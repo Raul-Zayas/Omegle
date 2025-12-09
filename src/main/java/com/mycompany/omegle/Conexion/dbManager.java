@@ -40,4 +40,27 @@ public class dbManager {
         return null;
     }
     
+    // Verifica credenciales del usuario
+    public static boolean verificarUsuario(String username, String password) {
+        Connection conn = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+
+        try {
+            conn = conexion.conectar();
+            if (conn != null) {
+                String consulta = "SELECT 1 FROM users WHERE username = ? AND password_hash = ?";
+                pst = conn.prepareStatement(consulta);
+                pst.setString(1, username);
+                pst.setString(2, password);
+                rs = pst.executeQuery();
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar usuario: " + e.getMessage());
+        } finally {
+            conexion.cerrarRecursos(rs, pst, conn);
+        }
+        return false;
+    }
 }
