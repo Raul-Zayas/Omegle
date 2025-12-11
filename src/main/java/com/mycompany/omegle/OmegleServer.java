@@ -4,10 +4,13 @@
  */
 package com.mycompany.omegle;
 
+import com.mycompany.omegle.REST.ImgUpServlet;
 import com.mycompany.omegle.REST.UserServlet;
+import jakarta.servlet.MultipartConfigElement;
 import java.io.File;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Wrapper;
 import org.apache.catalina.startup.Tomcat;
 
 /**
@@ -25,19 +28,29 @@ public class OmegleServer {
             Tomcat tomcat = new Tomcat();
             tomcat.setPort(HTTP_PORT);
             tomcat.getConnector();
-            
+
             // Crear contexto de la aplicación
             String contextPath = "";
             String docBase = new File(".").getAbsolutePath();
             Context context = tomcat.addContext(contextPath, docBase);
-            
+
             // Registrar UserServlet para registro
             Tomcat.addServlet(context, "UserServlet", new UserServlet());
             context.addServletMappingDecoded("/api/users/*", "UserServlet");
-            
+
+            // Registrar ImageUploadServlet con configuración multipart
+            Wrapper imageUploadWrapper = Tomcat.addServlet(context, "ImgUpServlet", new ImgUpServlet());
+            imageUploadWrapper.setMultipartConfigElement(new MultipartConfigElement(
+                    System.getProperty("java.io.tmpdir"),
+                    5242880, // maximo para el archivo (5MB)
+                    10485760, // maximo para la solicitud (10MB)
+                    0 // fileSizeThreshold
+            ));
+            context.addServletMappingDecoded("/api/upload-image", "ImgUpServlet");
+
             tomcat.start();
             System.out.println("Servidor HTTP iniciado en puerto " + HTTP_PORT);
-            
+
             tomcat.getServer().await();
         } catch (LifecycleException e) {
             System.err.println("Error iniciando servidor: " + e.getMessage());

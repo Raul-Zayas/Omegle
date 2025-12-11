@@ -61,7 +61,7 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="435" max="-2" attributes="0"/>
-                      <Component id="jLabel8" min="-2" pref="150" max="-2" attributes="0"/>
+                      <Component id="jLabelImgPerfil" min="-2" pref="150" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace pref="309" max="32767" attributes="0"/>
@@ -112,7 +112,7 @@
                   <Component id="jButtonSubirImg" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="38" max="-2" attributes="0"/>
-              <Component id="jLabel8" min="-2" pref="150" max="-2" attributes="0"/>
+              <Component id="jLabelImgPerfil" min="-2" pref="150" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="jButtonRegistrar" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -199,7 +199,7 @@
         <Property name="text" type="java.lang.String" value="Selecciona un archivo"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel8">
+    <Component class="javax.swing.JLabel" name="jLabelImgPerfil">
       <Properties>
         <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="text" type="java.lang.String" value="IMAGEN DE PERFIL"/>

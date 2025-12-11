@@ -1,5 +1,6 @@
 package com.mycompany.omegle.Panels;
 
+import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
@@ -24,7 +25,7 @@ public class jpRegistro extends javax.swing.JPanel {
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jButtonSubirImg = new javax.swing.JButton();
-        jLabel8 = new javax.swing.JLabel();
+        jLabelImgPerfil = new javax.swing.JLabel();
         jTextFieldCorreo = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
@@ -59,8 +60,8 @@ public class jpRegistro extends javax.swing.JPanel {
 
         jButtonSubirImg.setText("Selecciona un archivo");
 
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel8.setText("IMAGEN DE PERFIL");
+        jLabelImgPerfil.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelImgPerfil.setText("IMAGEN DE PERFIL");
 
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel9.setText("CORREO ELECTRONICO");
@@ -113,7 +114,7 @@ public class jpRegistro extends javax.swing.JPanel {
                         .addComponent(jLabel1))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(435, 435, 435)
-                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabelImgPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(309, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -151,7 +152,7 @@ public class jpRegistro extends javax.swing.JPanel {
                     .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButtonSubirImg))
                 .addGap(38, 38, 38)
-                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabelImgPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jButtonRegistrar)
                 .addGap(18, 18, 18)
@@ -165,7 +166,7 @@ public class jpRegistro extends javax.swing.JPanel {
     public javax.swing.JButton getBtnRegistrar() {
         return jButtonRegistrar;
     }
-    
+
     public javax.swing.JButton getBtnSubirImg() {
         return jButtonSubirImg;
     }
@@ -177,21 +178,25 @@ public class jpRegistro extends javax.swing.JPanel {
     public JTextField getjTextFullName() {
         return jTextFieldNombreCompleto;
     }
-    
+
     public JTextField getjTextUserName() {
         return jTextFieldUserName;
     }
-    
+
     public JTextField getjTextCorreo() {
         return jTextFieldCorreo;
     }
-    
+
     public JPasswordField getjPassword() {
         return jPasswordField;
     }
 
     public JPasswordField getjPasswordConfirm() {
         return jPasswordFieldConfirm;
+    }
+
+    public JLabel getjLabelImgPerfil() {
+        return jLabelImgPerfil;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -206,8 +211,8 @@ public class jpRegistro extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel jLabelImgPerfil;
     private javax.swing.JPasswordField jPasswordField;
     private javax.swing.JPasswordField jPasswordFieldConfirm;
     private javax.swing.JTextField jTextFieldCorreo;
