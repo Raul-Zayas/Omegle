@@ -1,5 +1,6 @@
 package com.mycompany.omegle.Frames;
 
+import com.mycompany.omegle.Client.RESTClient;
 import com.mycompany.omegle.Panels.jpChat;
 import com.mycompany.omegle.Panels.jpLogin;
 import com.mycompany.omegle.Panels.jpMenu;
@@ -30,10 +31,16 @@ public class jfCliente extends javax.swing.JFrame {
     
     Boolean outchat = true; // Controla si estamos fuera del chat
     
+    //Cliente REST
+    private RESTClient restClient;
+    
     public jfCliente() {
         initComponents();
         initCustomLayout();
         initLogic();
+        
+        //Inicializar cliente REST 
+        restClient = new RESTClient("http://localhost:8080");
     }
     
     //Configuracion de los paneles y el cardlayout
@@ -104,8 +111,48 @@ public class jfCliente extends javax.swing.JFrame {
     }
     
     private void accionRegistro() {
-        // Lógica de registro usando panelRegistro.getTxt...
-        JOptionPane.showMessageDialog(this, "Aun no modificas la logica del registro wey");
+        String username = panelRegistro.getjTextUserName().getText().trim();
+        String fullName = panelRegistro.getjTextFullName().getText().trim();
+        String email = panelRegistro.getjTextCorreo().getText().trim();
+        String password = new String(panelRegistro.getjPassword().getPassword());
+        String confPassword = new String(panelRegistro.getjPasswordConfirm().getPassword());
+        String urlImg = "";
+        
+        System.out.println("Usuario: " + username);
+        System.out.println("Nombre: " + fullName);
+        System.out.println("Correo: " + email);
+        System.out.println("Contraseña: " + password);
+        System.out.println("ConfContr: " + confPassword);
+        
+        // Validar campos
+        if (username.isEmpty() || fullName.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor complete todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (!password.equals(confPassword)) {
+            JOptionPane.showMessageDialog(this, "Las contraseñas no coinciden", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Llamar al servicio REST de registro usando RESTClient
+        boolean success = restClient.register(username, email, password, fullName, urlImg);
+
+        if (success) {
+            JOptionPane.showMessageDialog(this, "¡Usuario registrado exitosamente!\nYa puedes iniciar sesión.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            
+            // Limpiar campos
+            panelRegistro.getjTextUserName().setText("");
+            panelRegistro.getjTextFullName().setText("");
+            panelRegistro.getjTextCorreo().setText("");
+            panelRegistro.getjPassword().setText("");
+            panelRegistro.getjPasswordConfirm().setText("");
+            
+            // Volver a la pantalla de login
+            cardLayout.show(jPanelPrincipal, "login");
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al registrar el usuario.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
 
