@@ -5,6 +5,7 @@ import com.mycompany.omegle.Conexion.dbManager;
 import com.mycompany.omegle.Security.JwtUtil;
 import com.mycompany.omegle.Security.PasswordUtil;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,10 +16,49 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserServlet extends HttpServlet{
-    
+@WebServlet(name = "UserServlet", urlPatterns = {"/api/users/*"})
+public class UserServlet extends HttpServlet {
+
     dbManager db = new dbManager();
-    
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        resp.setContentType("application/json");
+        PrintWriter out = resp.getWriter();
+        
+        // Si action=list -> obtener todos los usuarios
+        if ("list".equalsIgnoreCase(action)) {
+            try (Connection conn = conexion.conectar()) {
+                String sql = "SELECT user_id, username, url_img, is_online FROM users ORDER BY user_id";
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery();
+
+                StringBuilder json = new StringBuilder("{\"status\":\"ok\",\"users\":[");
+                boolean first = true;
+                while (rs.next()) {
+                    if (!first) {
+                        json.append(",");
+                    }
+                    json.append(String.format("{\"userId\":%d,\"username\":\"%s\",\"urlImg\":\"%s\",\"isOnline\":%b}",
+                            rs.getInt("user_id"),
+                            rs.getString("username"),
+                            rs.getString("url_img") != null ? rs.getString("url_img") : "",
+                            rs.getBoolean("is_online")));
+                    first = false;
+                }
+                json.append("]}");
+                out.print(json.toString());
+            } catch (SQLException e) {
+                System.err.println("Error SQL al listar usuarios: " + e.getMessage());
+                e.printStackTrace();
+                out.print("{\"status\":\"error\",\"message\":\"Error de base de datos\"}");
+            }
+            out.flush();
+            return;
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // Registrar usuario o login

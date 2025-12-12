@@ -1,25 +1,36 @@
 package com.mycompany.omegle.Frames;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mycompany.omegle.Client.RESTClient;
 import com.mycompany.omegle.Conexion.dbManager;
 import com.mycompany.omegle.Panels.jpChat;
 import com.mycompany.omegle.Panels.jpLogin;
 import com.mycompany.omegle.Panels.jpMenu;
 import com.mycompany.omegle.Panels.jpRegistro;
+import com.mycompany.omegle.Renderer.ImgTabla;
 import java.awt.CardLayout;
+import java.awt.Color;
+import static java.awt.EventQueue.invokeLater;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 
 public class jfCliente extends javax.swing.JFrame {
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(jfCliente.class.getName());
-    
+
     dbManager db = new dbManager();
 
     // Instancias de los Paneles
@@ -27,6 +38,8 @@ public class jfCliente extends javax.swing.JFrame {
     private jpRegistro panelRegistro;
     private jpMenu panelMenu;
     private jpChat panelChat;
+
+    private JTable jTableUsuarios;
 
     private CardLayout cardLayout;
 
@@ -39,7 +52,7 @@ public class jfCliente extends javax.swing.JFrame {
 
     private String rutaImagen = null;
 
-    Boolean outchat = true; // Controla si estamos fuera del chat
+    private volatile Boolean outchat = true; // Controla si estamos fuera del chat
 
     //Cliente REST
     private RESTClient restClient;
@@ -50,6 +63,15 @@ public class jfCliente extends javax.swing.JFrame {
         initComponents();
         initCustomLayout();
         initLogic();
+
+        jTableUsuarios = panelMenu.getTableUsuarios();
+
+        // Configurar el renderer de imágenes para la primera columna
+        jTableUsuarios.getColumnModel().getColumn(0).setCellRenderer(new ImgTabla());
+        // Establecer altura de fila para las imágenes
+        jTableUsuarios.setRowHeight(52);
+        // Configurar que las celdas no sean editables
+        jTableUsuarios.setDefaultEditor(Object.class, null);
 
         //Inicializar cliente REST 
         restClient = new RESTClient("http://localhost:8080");
@@ -87,7 +109,7 @@ public class jfCliente extends javax.swing.JFrame {
         panelRegistro.getBtnRegistrar().addActionListener(e -> accionRegistro()); //Boton para registrar el usuario
         panelRegistro.getBtnIniciarSesion().addActionListener(e -> cardLayout.show(jPanelPrincipal, "login")); // Botón volver al jPanel de inicio de sesion
         panelRegistro.getBtnSubirImg().addActionListener(e -> accionSeleccionarImagen()); //Boton para seleccionar la imagen
-        
+
         // --- EVENTOS DEL MENÚ ---
         panelMenu.getjButtonCerrarSesion().addActionListener(e -> accionCerrarSesion());
     }
@@ -135,7 +157,7 @@ public class jfCliente extends javax.swing.JFrame {
                     "Error de Conexión", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void accionCerrarSesion() {
         // Marcar usuario como offline en la base de datos
         if (username != null && !username.isEmpty()) {
@@ -150,7 +172,7 @@ public class jfCliente extends javax.swing.JFrame {
         jwtToken = null;
         username = "";
         iduser = "";
-        
+
         // Volver al login
         cardLayout.show(jPanelPrincipal, "login");
         JOptionPane.showMessageDialog(this, "Sesión cerrada", "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -161,7 +183,7 @@ public class jfCliente extends javax.swing.JFrame {
         outchat = true; // No estamos en chat
 
         // Serán los hilos para actualizar de tablas
-        // ActualizarTablas();
+        ActualizarTablas();
     }
 
     private void accionRegistro() {
@@ -262,6 +284,117 @@ public class jfCliente extends javax.swing.JFrame {
                 rutaImagen = null;
             }
         }
+    }
+
+    // =======================================================
+    //                      HILOS
+    // =======================================================
+    private void ActualizarTablas() {
+        Thread hilo = new Thread(() -> {
+            while (outchat) {
+                try {
+                    if (panelMenu.isShowing()) { // Solo si el menú está visible
+                        MostrarUsuariosOmegle(); // funcion pa mostrar los usuarios en la bd
+                    }
+                    Thread.sleep(5000); //️ se ejecuta cada 5 segundos
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        });
+        hilo.setDaemon(true); //Si el programa finaliza termina el hilo
+        hilo.start();
+    }
+
+    // Obtener lista de todos los usuarios desde la base de datos con REST
+    private void MostrarUsuariosOmegle() {
+        try {
+            if (restClient != null) {
+                String response = restClient.getAllUsers();
+                if (response != null) {
+                    parseAndUpdateUsuarios(response);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al actualizar usuarios: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // extrae los datos del json proporcionado por rest
+    private void parseAndUpdateUsuarios(String jsonResponse) {
+        try {
+            JsonObject json = new Gson().fromJson(jsonResponse, JsonObject.class); //convierte el string json a object json
+            if (json.get("status").getAsString().equals("ok")) { //Verifica que no haya error
+                JsonArray users = json.getAsJsonArray("users"); //extrar un array de usuarios
+
+                invokeLater(() -> { //Encola la actualización de la tabla en el Event Dispatch Thread (EDT).
+                    DefaultTableModel model = (DefaultTableModel) panelMenu.getTableUsuarios().getModel();
+                    model.setRowCount(0); // Limpiar tabla
+
+                    //ciclo para agregar los usuarios a la tabla (modelo)
+                    for (int i = 0; i < users.size(); i++) {
+
+                        JsonObject user = users.get(i).getAsJsonObject();
+
+                        int userId = user.get("userId").getAsInt(); //id del usuario
+                        String userName = user.get("username").getAsString(); //usuario del usuarioxd
+                        String urlImg = user.has("urlImg") ? user.get("urlImg").getAsString() : ""; //nombre del archivo de la imagen
+                        boolean isOnline = user.get("isOnline").getAsBoolean(); //ta conectado?
+
+                        // carga solo los usuarios que no son el que está logeado
+                        if (!userName.equals(username)) {
+                            ImageIcon scaledIcon = cargarImagenPerfil(user.get("username").getAsString()); //obtiene la imagen
+                            String estado = isOnline ? "online" : "offline";
+                            model.addRow(new Object[]{scaledIcon, userId, userName, estado}); //agrega el usuario al modelo para ser cargado a la tabla
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("Error al parsear respuesta de usuarios: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // busca la imagen del por el nombre del usuario (de envalde la columna en la bd)
+    private ImageIcon cargarImagenPerfil(String username) {
+        try {
+            URL imgUrl = getClass().getResource("/imagenesPerfil/imgPerfil-" + username + ".jpg");
+
+            // Intentar cargar imagen del usuario
+            if (imgUrl != null) {
+                ImageIcon icon = new ImageIcon(imgUrl);
+                Image raw = icon.getImage();
+                if (raw != null && raw.getWidth(null) > 0) { // Verificar que sea válida
+                    Image scaled = raw.getScaledInstance(48, 48, Image.SCALE_SMOOTH);
+                    return new ImageIcon(scaled);
+                }
+            }
+
+            // Si falla o no hay imagen de usuario, intenta cargar la imagen default
+            URL imgUrlDefault = getClass().getResource("/imagenesPerfil/imgPerfil-default.jpg");
+            if (imgUrlDefault != null) {
+                ImageIcon defaultIcon = new ImageIcon(imgUrlDefault);
+                Image rawDefault = defaultIcon.getImage();
+                if (rawDefault != null) {
+                    Image scaledDefault = rawDefault.getScaledInstance(48, 48, Image.SCALE_SMOOTH);
+                    return new ImageIcon(scaledDefault);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al cargar imagen de perfil: " + e.getMessage());
+            // Retornar placeholder en caso de fallar en ambos casos
+            BufferedImage placeholder = new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = (Graphics2D) placeholder.getGraphics();
+            g.setColor(Color.LIGHT_GRAY);
+            g.fillRect(0, 0, 48, 48);
+            g.setColor(java.awt.Color.DARK_GRAY);
+            g.drawRect(0, 0, 47, 47);
+            g.dispose();
+            return new ImageIcon(placeholder);
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -97,5 +98,19 @@ public class RESTClient {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    // Obtiene la lista de todos los usuarios registrados con su estado de conexión
+    public String getAllUsers() {
+        try {
+            String url = baseUrl + "/api/users?action=list";
+            
+            HttpGet get = new HttpGet(url);
+            CloseableHttpResponse response = httpClient.execute(get);
+            return EntityUtils.toString(response.getEntity());
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
