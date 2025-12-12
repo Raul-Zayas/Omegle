@@ -1,6 +1,9 @@
 package com.mycompany.omegle.REST;
 
 import com.mycompany.omegle.Conexion.conexion;
+import com.mycompany.omegle.Conexion.dbManager;
+import com.mycompany.omegle.Security.JwtUtil;
+import com.mycompany.omegle.Security.PasswordUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,9 +12,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserServlet extends HttpServlet{
+    
+    dbManager db = new dbManager();
     
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -30,9 +36,29 @@ public class UserServlet extends HttpServlet{
             return;
         }
 
-        // Si action=login -> intentar autenticación y devolver JWT
+        // Si action = login -> intentar autenticación y devolver JWT
         if ("login".equalsIgnoreCase(action)) {
-            //Logica para el login
+            try (Connection conn = conexion.conectar()) {
+                String sql = "SELECT password_hash FROM users WHERE username = ?";
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ps.setString(1, username);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    String stored = rs.getString("password_hash");
+                    if (stored != null && PasswordUtil.verify(password, stored)) {
+                        db.actualizarEstadoUsuario(username, true);
+                        String token = JwtUtil.generateToken(username);
+                        out.print(String.format("{\"status\":\"ok\",\"token\":\"%s\"}", token));
+                    } else {
+                        out.print("{\"status\":\"error\",\"message\":\"Credenciales inválidas\"}");
+                    }
+                } else {
+                    out.print("{\"status\":\"error\",\"message\":\"Usuario no encontrado\"}");
+                }
+            } catch (SQLException e) {
+                out.print("{\"status\":\"error\",\"message\":\"Error de base de datos\"}");
+            }
+            out.flush();
             return;
         }
 

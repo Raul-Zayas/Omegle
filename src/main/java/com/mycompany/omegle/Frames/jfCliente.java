@@ -1,6 +1,7 @@
 package com.mycompany.omegle.Frames;
 
 import com.mycompany.omegle.Client.RESTClient;
+import com.mycompany.omegle.Conexion.dbManager;
 import com.mycompany.omegle.Panels.jpChat;
 import com.mycompany.omegle.Panels.jpLogin;
 import com.mycompany.omegle.Panels.jpMenu;
@@ -18,6 +19,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class jfCliente extends javax.swing.JFrame {
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(jfCliente.class.getName());
+    
+    dbManager db = new dbManager();
 
     // Instancias de los Paneles
     private jpLogin panelLogin;
@@ -40,6 +43,8 @@ public class jfCliente extends javax.swing.JFrame {
 
     //Cliente REST
     private RESTClient restClient;
+
+    private String jwtToken = null;
 
     public jfCliente() {
         initComponents();
@@ -82,6 +87,9 @@ public class jfCliente extends javax.swing.JFrame {
         panelRegistro.getBtnRegistrar().addActionListener(e -> accionRegistro()); //Boton para registrar el usuario
         panelRegistro.getBtnIniciarSesion().addActionListener(e -> cardLayout.show(jPanelPrincipal, "login")); // Botón volver al jPanel de inicio de sesion
         panelRegistro.getBtnSubirImg().addActionListener(e -> accionSeleccionarImagen()); //Boton para seleccionar la imagen
+        
+        // --- EVENTOS DEL MENÚ ---
+        panelMenu.getjButtonCerrarSesion().addActionListener(e -> accionCerrarSesion());
     }
 
     // =======================================================
@@ -98,16 +106,54 @@ public class jfCliente extends javax.swing.JFrame {
     }
 
     private void accionLogin() {
-        username = panelLogin.getTxtUsuario().getText();
-        String pass = panelLogin.getTxtPassword().getText();
+        // 1. Obtener datos del formulario
+        username = panelLogin.getUsuario().getText().trim();
+        String password = panelLogin.getPassword().getText();
 
-        JOptionPane.showMessageDialog(this, "Aun no modificas la logica del ingreso wey");
+        // 2. Validar campos no vacíos
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor complete todos los campos",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-        /*if (UserExist && !UserConected) {*/
-        ingresoExitoso();
-        /*} else {
-            JOptionPane.showMessageDialog(this, "Error al iniciar sesión.\nVerifique sus credenciales");
-        }*/
+        // 3. Intentar login con el servidor REST
+        try {
+            jwtToken = restClient.login(username, password);
+            System.out.println("token: " + jwtToken);
+
+            if (jwtToken != null && !jwtToken.isEmpty()) {
+                // Login exitoso
+                iduser = username;
+                ingresoExitoso();        // Cambia a pantalla del menú
+            } else {
+                JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos",
+                        "Error de Login", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al conectar con el servidor x.x \n" + ex.getMessage(),
+                    "Error de Conexión", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void accionCerrarSesion() {
+        // Marcar usuario como offline en la base de datos
+        if (username != null && !username.isEmpty()) {
+            try {
+                db.actualizarEstadoUsuario(username, false);
+            } catch (Exception e) {
+                System.err.println("Error al actualizar estado: " + e.getMessage());
+            }
+        }
+
+        // Limpiar variables de sesión
+        jwtToken = null;
+        username = "";
+        iduser = "";
+        
+        // Volver al login
+        cardLayout.show(jPanelPrincipal, "login");
+        JOptionPane.showMessageDialog(this, "Sesión cerrada", "Info", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void ingresoExitoso() {

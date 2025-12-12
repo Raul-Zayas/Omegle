@@ -14,11 +14,11 @@ public class jpLogin extends javax.swing.JPanel {
         jLabelName = new javax.swing.JLabel();
         jLabelPassword = new javax.swing.JLabel();
         jTextFieldName = new javax.swing.JTextField();
-        jTextFieldPassword = new javax.swing.JTextField();
         jButtonEntrar = new javax.swing.JButton();
         jLabelRegistrar = new javax.swing.JLabel();
         jButtonRegistrar = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        jPassword = new javax.swing.JPasswordField();
 
         jLabelIniciarSesion.setFont(new java.awt.Font("Segoe UI", 3, 36)); // NOI18N
         jLabelIniciarSesion.setText("INICIAR SESION");
@@ -64,7 +64,7 @@ public class jpLogin extends javax.swing.JPanel {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabelPassword)
                                 .addGap(18, 18, 18)
-                                .addComponent(jTextFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabelName)
                                 .addGap(18, 18, 18)
@@ -96,8 +96,8 @@ public class jpLogin extends javax.swing.JPanel {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelPassword)
-                    .addComponent(jTextFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(92, 92, 92)
+                    .addComponent(jPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(94, 94, 94)
                 .addComponent(jButtonEntrar)
                 .addGap(81, 81, 81)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -119,12 +119,12 @@ public class jpLogin extends javax.swing.JPanel {
         return jButtonRegistrar;
     }
 
-    public javax.swing.JTextField getTxtUsuario() {
+    public javax.swing.JTextField getUsuario() {
         return jTextFieldName;
     }
 
-    public javax.swing.JTextField getTxtPassword() {
-        return jTextFieldPassword;
+    public javax.swing.JPasswordField getPassword() {
+        return jPassword;
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -135,7 +135,7 @@ public class jpLogin extends javax.swing.JPanel {
     private javax.swing.JLabel jLabelName;
     private javax.swing.JLabel jLabelPassword;
     private javax.swing.JLabel jLabelRegistrar;
+    private javax.swing.JPasswordField jPassword;
     private javax.swing.JTextField jTextFieldName;
-    private javax.swing.JTextField jTextFieldPassword;
     // End of variables declaration//GEN-END:variables
 }

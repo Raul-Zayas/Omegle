@@ -1,5 +1,7 @@
 package com.mycompany.omegle.Panels;
 
+import javax.swing.JButton;
+
 public class jpMenu extends javax.swing.JPanel {
 
     public jpMenu() {
@@ -27,7 +29,7 @@ public class jpMenu extends javax.swing.JPanel {
         jScrollPane3 = new javax.swing.JScrollPane();
         jTableSolicitudes = new javax.swing.JTable();
         jLabelSolicitudes = new javax.swing.JLabel();
-        jButtonEndSession = new javax.swing.JButton();
+        jButtonCerrarSesion = new javax.swing.JButton();
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -121,7 +123,7 @@ public class jpMenu extends javax.swing.JPanel {
         jLabelSolicitudes.setFont(new java.awt.Font("Segoe UI", 2, 24)); // NOI18N
         jLabelSolicitudes.setText("SOLICITUDES DE AMISTAD");
 
-        jButtonEndSession.setText("CERRAR SESION");
+        jButtonCerrarSesion.setText("CERRAR SESION");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -129,8 +131,8 @@ public class jpMenu extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButtonEndSession, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(76, 76, 76)
+                .addComponent(jButtonCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(61, 61, 61)
                 .addComponent(jLabelAmigos)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabelSolicitudes)
@@ -177,8 +179,8 @@ public class jpMenu extends javax.swing.JPanel {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabelAmigos, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabelSolicitudes))
-                    .addComponent(jButtonEndSession, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                    .addComponent(jButtonCerrarSesion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -225,10 +227,16 @@ public class jpMenu extends javax.swing.JPanel {
         return jTextFieldUsuarioBsqUsuarios;
     }
 
+    public JButton getjButtonCerrarSesion() {
+        return jButtonCerrarSesion;
+    }
+    
+    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAgregarAmigo;
     private javax.swing.JButton jButtonBuscarAmigo;
-    private javax.swing.JButton jButtonEndSession;
+    private javax.swing.JButton jButtonCerrarSesion;
     private javax.swing.JLabel jLabelAmigos;
     private javax.swing.JLabel jLabelSolicitudes;
     private javax.swing.JLabel jLabelUsuarioBsqAmigos;

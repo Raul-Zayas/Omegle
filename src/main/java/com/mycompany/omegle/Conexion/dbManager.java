@@ -110,4 +110,28 @@ public class dbManager {
         }
         return null;
     }
+    
+    // Actualiza el estado de conexión de un usuario
+    public static boolean actualizarEstadoUsuario(String username, boolean isOnline) {
+        Connection conn = null;
+        PreparedStatement pst = null;
+
+        try {
+            conn = conexion.conectar();
+            if (conn != null) {
+                String consulta = "UPDATE users SET is_online = ? WHERE username = ?";
+                pst = conn.prepareStatement(consulta);
+                pst.setBoolean(1, isOnline);
+                pst.setString(2, username);
+                
+                int filasAfectadas = pst.executeUpdate();
+                return filasAfectadas > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar estado de usuario: " + e.getMessage());
+        } finally {
+            conexion.cerrarRecursos(null, pst, conn);
+        }
+        return false;
+    }
 }

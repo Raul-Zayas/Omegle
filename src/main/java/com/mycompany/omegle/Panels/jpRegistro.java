@@ -69,10 +69,6 @@ public class jpRegistro extends javax.swing.JPanel {
         jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel10.setText("NOMBRE DE USUARIO");
 
-        jPasswordField.setText("jPasswordField1");
-
-        jPasswordFieldConfirm.setText("jPasswordField2");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(

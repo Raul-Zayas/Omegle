@@ -5,9 +5,8 @@
 package com.mycompany.omegle;
 
 import com.mycompany.omegle.Frames.jfCliente;
+import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import static javax.swing.UIManager.getInstalledLookAndFeels;
-import static javax.swing.UIManager.setLookAndFeel;
 
 /**
  *
@@ -15,11 +14,12 @@ import static javax.swing.UIManager.setLookAndFeel;
  */
 public class ClienteApp {
     public static void main(String[] args) {
+        UIManager ui = new UIManager();
         // Establecer look and feel del sistema
         try {
-            for (LookAndFeelInfo info : getInstalledLookAndFeels()) {
+            for (LookAndFeelInfo info : ui.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
-                    setLookAndFeel(info.getClassName());
+                    ui.setLookAndFeel(info.getClassName());
                     break;
                 }
             }

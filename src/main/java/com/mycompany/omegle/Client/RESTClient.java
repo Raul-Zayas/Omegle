@@ -20,6 +20,7 @@ public class RESTClient {
     private final String baseUrl;
     private final CloseableHttpClient httpClient;
     private final Gson gson;
+    private String jwtToken;
 
     public RESTClient(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -73,5 +74,28 @@ public class RESTClient {
         // Parsea respuesta JSON
         JsonObject json = gson.fromJson(responseBody, JsonObject.class);
         return json.get("status").getAsString().equals("ok");
+    }
+    
+    // Realiza login y obtiene el token JWT
+    public String login(String username, String password) {
+        try {
+            // Codificar parámetros para evitar caracteres ilegales en URL
+            String url = baseUrl + "/api/users?action=login"
+                    + "&username=" + URLEncoder.encode(username, StandardCharsets.UTF_8) 
+                    + "&password=" + URLEncoder.encode(password, StandardCharsets.UTF_8);
+            
+            HttpPost post = new HttpPost(url);
+            CloseableHttpResponse response = httpClient.execute(post);
+            String responseBody = EntityUtils.toString(response.getEntity());
+            
+            JsonObject json = gson.fromJson(responseBody, JsonObject.class);
+            if (json.get("status").getAsString().equals("ok")) {
+                this.jwtToken = json.get("token").getAsString();
+                return this.jwtToken;
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
