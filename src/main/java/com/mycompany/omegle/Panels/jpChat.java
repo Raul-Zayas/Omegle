@@ -6,6 +6,27 @@ public class jpChat extends javax.swing.JPanel {
         initComponents();
     }
 
+    // Establece el nombre del amigo
+    public void setNombreAmigo(String nombre) {
+        jLabelNombreAmigo.setText("Chateando con: " + nombre);
+    }
+
+    //Establece el nombre del usuario
+    public void setUsuarioActual(String username) {
+        jLabelBienvenidaUsuario.setText("Bienvenido " + username);
+    }
+
+    //Agrega el mensaje a la conversacion
+    public void agregarMensaje(String mensaje) {
+        jTextAreaConversacion.append(mensaje + "\n");
+        jTextAreaConversacion.setCaretPosition(jTextAreaConversacion.getDocument().getLength());
+    }
+
+    //Limpia el chat
+    public void limpiarChat() {
+        jTextAreaConversacion.setText("");
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -146,14 +167,14 @@ public class jpChat extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRegresarActionPerformed
-        
+
     }//GEN-LAST:event_jButtonRegresarActionPerformed
 
-    public javax.swing.JTextArea getTxtAreaConversacion() {
+    public javax.swing.JTextArea getAreaConversacion() {
         return jTextAreaConversacion;
     }
 
-    public javax.swing.JTextField getTxtMensaje() {
+    public javax.swing.JTextField getMensaje() {
         return jTextFieldMensaje;
     }
 

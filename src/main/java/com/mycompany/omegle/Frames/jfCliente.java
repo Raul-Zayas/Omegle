@@ -10,6 +10,7 @@ import com.mycompany.omegle.Panels.jpLogin;
 import com.mycompany.omegle.Panels.jpMenu;
 import com.mycompany.omegle.Panels.jpRegistro;
 import com.mycompany.omegle.Renderer.ImgTabla;
+import com.mycompany.omegle.Client.TCPCliente;
 import java.awt.CardLayout;
 import java.awt.Color;
 import static java.awt.EventQueue.invokeLater;
@@ -45,9 +46,7 @@ public class jfCliente extends javax.swing.JFrame {
 
     // Variables de Lógica
     String clienteip = "";
-    String iduser = "";
     String username = "";
-    String idfriend = "";
     String friendname = "";
 
     private String rutaImagen = null;
@@ -58,6 +57,10 @@ public class jfCliente extends javax.swing.JFrame {
     private RESTClient restClient;
 
     private String jwtToken = null;
+
+    private TCPCliente tcpCliente;
+
+    private static final String SERVER_IP = "192.168.1.64"; // IP del servidor
 
     public jfCliente() {
         initComponents();
@@ -74,7 +77,7 @@ public class jfCliente extends javax.swing.JFrame {
         jTableUsuarios.setDefaultEditor(Object.class, null);
 
         //Inicializar cliente REST 
-        restClient = new RESTClient("http://localhost:8080");
+        restClient = new RESTClient("http://" + SERVER_IP + ":8080");
     }
 
     //Configuracion de los paneles y el cardlayout
@@ -111,7 +114,18 @@ public class jfCliente extends javax.swing.JFrame {
         panelRegistro.getBtnSubirImg().addActionListener(e -> accionSeleccionarImagen()); //Boton para seleccionar la imagen
 
         // --- EVENTOS DEL MENÚ ---
-        panelMenu.getjButtonCerrarSesion().addActionListener(e -> accionCerrarSesion());
+        panelMenu.getjButtonCerrarSesion().addActionListener(e -> accionCerrarSesion()); //Boton para cerrar la sesion
+        panelMenu.getTableUsuarios().addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) { // Se ejecuta si se da doble clic
+                    accionSeleccionarUsuario();
+                }
+            }
+        });
+
+        // --- EVENTOS DEL CHAT ---
+        panelChat.getBtnEnviar().addActionListener(e -> accionEnviarMensaje()); //Boton para enviar un mensaje al usuario
+        panelChat.getBtnRegresar().addActionListener(e -> accionRegresar()); // Boton para salir de una chat        
     }
 
     // =======================================================
@@ -146,8 +160,8 @@ public class jfCliente extends javax.swing.JFrame {
 
             if (jwtToken != null && !jwtToken.isEmpty()) {
                 // Login exitoso
-                iduser = username;
-                ingresoExitoso();        // Cambia a pantalla del menú
+                ingresoExitoso(); // Cambia a pantalla del menú
+                conectarTCP(); // Conectar al servidor TCP con el token
             } else {
                 JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos",
                         "Error de Login", JOptionPane.ERROR_MESSAGE);
@@ -171,7 +185,6 @@ public class jfCliente extends javax.swing.JFrame {
         // Limpiar variables de sesión
         jwtToken = null;
         username = "";
-        iduser = "";
 
         // Volver al login
         cardLayout.show(jPanelPrincipal, "login");
@@ -254,8 +267,7 @@ public class jfCliente extends javax.swing.JFrame {
         }
     }
 
-    // Despliega el navegador de archivos para seleccionar una imagen
-    private void accionSeleccionarImagen() {
+    private void accionSeleccionarImagen() { // Despliega el navegador de archivos para seleccionar una imagen
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Selecciona una imagen de perfil");
 
@@ -284,6 +296,92 @@ public class jfCliente extends javax.swing.JFrame {
                 rutaImagen = null;
             }
         }
+    }
+
+    private void accionSeleccionarUsuario() {
+        int selectedRow = panelMenu.getTableUsuarios().getSelectedRow();
+        if (selectedRow >= 0) {
+            // Obtener nombre del usuario seleccionado de la tabla (columna 2 = USUARIO)
+            String selectedUser = panelMenu.getTableUsuarios().getValueAt(selectedRow, 2).toString();
+            friendname = selectedUser;
+            abrirChat(); // Cambia a la vista del chat con el usuario seleccionado
+        }
+    }
+
+    private void abrirChat() {
+        panelChat.setUsuarioActual(username);// Mensaje de bienvenida al usuario
+        panelChat.setNombreAmigo(friendname);// Con quien va a chatear
+        panelChat.limpiarChat();             // Limpia el chat
+
+        outchat = false;                          // Marca que estamos en chat
+        cardLayout.show(jPanelPrincipal, "chat"); // Cambia a vista de chat
+    }
+
+    private void conectarTCP() {
+        try {
+            // establece la conexion con el servidor TCP
+            tcpCliente = new TCPCliente(SERVER_IP, 5000);
+
+            // Autenticar con el JWT token
+            boolean authenticated = tcpCliente.authenticate(jwtToken, username);
+
+            if (authenticated) {
+                System.out.println("Conectado y autenticado en servidor TCP");
+
+                // se inicia el listener para mensajes entrantes
+                tcpCliente.startListening(message -> {
+                    // Manejar mensajes en el hilo de Swing
+                    invokeLater(() -> {
+                        procesarMensajeTCP(message); //formatea el mensaje para mostrarlo en el chat
+                    });
+                });
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al autenticar -.-", "Error", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error al conectar TCP: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    private void accionEnviarMensaje() {
+        String mensaje = panelChat.getMensaje().getText().trim();
+
+        if (mensaje.isEmpty()) { //verifica que no esté vacio
+            return;
+        }
+
+        if (tcpCliente != null && tcpCliente.isAuthenticated()) { //se comprueba que el usuario esté autenticado
+            // Enviar mensaje por TCP
+            tcpCliente.sendMessage(friendname, mensaje);
+
+            // Mostrar mensaje propio en el chat
+            panelChat.agregarMensaje("Tú: " + mensaje);
+
+            // Limpiar campo de texto
+            panelChat.getMensaje().setText("");
+        } else {
+            JOptionPane.showMessageDialog(this, "No estás conectado al servidor :P", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void procesarMensajeTCP(String message) {
+        System.out.println("Mensaje TCP recibido: " + message);
+        // Si estamos en el chat, mostrar el mensaje
+        if (!outchat && panelChat != null) {
+            // Formato esperado: "FROM:usuario:mensaje"
+            String[] parts = message.substring(5).split(":", 2);
+            if (parts.length == 2) {
+                String sender = parts[0];
+                String content = parts[1];
+                panelChat.agregarMensaje(sender + ": " + content);
+            }
+        }
+    }
+
+    private void accionRegresar() {
+        outchat = true;
+        cardLayout.show(jPanelPrincipal, "menu");
     }
 
     // =======================================================

@@ -6,6 +6,7 @@ package com.mycompany.omegle;
 
 import com.mycompany.omegle.REST.ImgUpServlet;
 import com.mycompany.omegle.REST.UserServlet;
+import com.mycompany.omegle.Servers.TCPServer;
 import jakarta.servlet.MultipartConfigElement;
 import java.io.File;
 import org.apache.catalina.Context;
@@ -23,6 +24,19 @@ public class OmegleServer {
 
     public static void main(String[] args) {
         System.out.println("=== Iniciando Servidor =) ====");
+        
+        // Se inicia el servidor TCP en un hilo separado
+        Thread tcpThread = new Thread(() -> {
+            try {
+                TCPServer tcpServer = new TCPServer();
+                tcpServer.start();
+            } catch (Exception e) {
+                System.err.println("Error iniciando TCP Server: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        tcpThread.setName("TCP-Server-Thread");
+        tcpThread.start();
 
         try {
             Tomcat tomcat = new Tomcat();
